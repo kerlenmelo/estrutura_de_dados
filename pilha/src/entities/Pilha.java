@@ -51,7 +51,7 @@ public class Pilha {
         }
         else {
             for(No p = refTopo; p != null; p = p.getProx()) {
-                System.out.println(p.getInfo() + " ");
+                System.out.println(p.getInfo());
             }
         }
     }
