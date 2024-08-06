@@ -13,7 +13,6 @@ public class AVL {
         this.noRaiz = new No(info);
     }
 
-    
     // CALCULAR ALTURA
     private int calcularAltura(No noParaCalcAltura) {
         if (noParaCalcAltura == null) {
@@ -24,57 +23,66 @@ public class AVL {
 
     // ATUALIZAR ALTURA:
     private void atualizarAltura(No noParaAtualizar) {
-        if (noParaAtualizar != null) {
+        if (noParaAtualizar == null) {
+            
+        }
+        else if (noParaAtualizar != null) {
             int alturaFilhoEsquerdo = calcularAltura(noParaAtualizar.getEsquerda());
             int alturaFilhoDireito = calcularAltura(noParaAtualizar.getDireita());
             // altura = 1 + altura do filho mais alto
             noParaAtualizar.setAltura(1 + Math.max(alturaFilhoEsquerdo, alturaFilhoDireito));
+            noParaAtualizar.setBalanceamento(getFatorBalanceamento(noParaAtualizar));
         }
     }
 
-
-
     // CALCULAR BALANCEAMENTO
-    private int getBalanceamento(No noParaBalancear) {
+    private int getFatorBalanceamento(No noParaBalancear) {
         if (noParaBalancear == null) {
             return 0;
         }
         // fator de balanceamento = alturaEsq - alturaDir
         return calcularAltura(noParaBalancear.getEsquerda()) - calcularAltura(noParaBalancear.getDireita());
-         
+
     }
 
+ 
+
     // REBALANCEAR:
-    private No rebalancear (No noInserido) {
+    private No rebalancear(No no) {
+        if (no == null) {
+            return null;
+        }
+
         // Calcular o fator de balanceamento do nó crítico
-        int fatorBalanceamento = getBalanceamento(noInserido);
+        int fatorBalanceamento = getFatorBalanceamento(no);
 
         // Verificar o tipo de desbalanceamento:
 
-        if (fatorBalanceamento > 1) {   // Desbalanceamento à esquerda
-            if(getBalanceamento(noInserido.getEsquerda()) >= 0) {
+        if (fatorBalanceamento > 1) { // Desbalanceamento à esquerda
+            if (getFatorBalanceamento(no.getEsquerda()) >= 0) {
                 // caso 1: rotação simples à direita
-                return rotacionarDireita(noInserido);
-            }   
-                // caso 2: rotação dupla esquerda-direita
+                return rotacionarDireita(no);
+            }
+            // caso 2: rotação dupla esquerda-direita
             else {
-                noInserido.setEsquerda(rotacionarEsquerda(noInserido.getEsquerda()));
-                return rotacionarDireita(noInserido);
-            }  
+                no.setEsquerda(rotacionarEsquerda(no.getEsquerda()));
+                return rotacionarDireita(no);
+            }
         }
-        else if (fatorBalanceamento < -1) {   // Desbalanceamento à direita 
-            if(getBalanceamento(noInserido.getDireita()) <= 0) {
+
+        else if (fatorBalanceamento < -1) { // Desbalanceamento à direita
+            if (getFatorBalanceamento(no.getDireita()) <= 0) {
                 // caso 3: rotação simples à esquerda
-                return rotacionarEsquerda(noInserido);
+                return rotacionarEsquerda(no);
             }
-                // caso 4: rotação dupla direita-esquerda
+            // caso 4: rotação dupla direita-esquerda
             else {
-                noInserido.setDireita(rotacionarDireita(noInserido.getDireita()));
-                return rotacionarEsquerda(noInserido);
+                no.setDireita(rotacionarDireita(no.getDireita()));
+                return rotacionarEsquerda(no);
             }
         }
-        // Retorna o nó atual se não precisar de rebalanceamento
-        return noInserido;
+        // Retorna o nó já balanceado, se precisar de balanceamento
+        return no;
     }
 
 
@@ -84,110 +92,107 @@ public class AVL {
         this.noRaiz = insere(this.noRaiz, info);
     }
 
-    private No insere(No noAtual, int info) {
-        
+    private No insere(No no, int info) {
+
         // Nó não existe na árvore
-        if (noAtual == null) {
+        if (no == null) {
             return new No(info);
         }
 
         // inserção à esquerda
-        if (info < noAtual.getInfo()) {
+        if (info < no.getInfo()) {
             // chama a função recursivamente até a esquerda ser null
-            noAtual.setEsquerda(insere(noAtual.getEsquerda(), info));
+            no.setEsquerda(insere(no.getEsquerda(), info));
         }
-        
+
         // inserção à direita
-        else if (info > noAtual.getInfo()) {
+        else if (info > no.getInfo()) {
             // chama a função recursivamente até a direita ser null
-            noAtual.setDireita(insere(noAtual.getDireita(), info));
+            no.setDireita(insere(no.getDireita(), info));
+        } else {
+            return no;
         }
-        else {
-            return noAtual;
-        }
-    
+
         // atualiza altura do nó atual
-        atualizarAltura(noAtual);
+        atualizarAltura(no);
 
-        // balanceia o nó atual e retorna a nova raiz
-        return rebalancear(noAtual);
+        // balanceia a árvore a partir do nó crítico
+        return rebalancear(no);
     }
-
-
 
     // REMOVE():
     public void remove(int info) {
         this.noRaiz = remove(this.noRaiz, info);
     }
 
-    private No remove(No noAtual, int info) {
+    private No remove(No no, int info) {
         // Nó não existe na árvore
-        if (noAtual == null) {
+        if (no == null) {
             return null;
         }
 
         // Realizar remoção:
 
         // nó a ser removido está na subárvore à esquerda da raiz
-        if (info < noAtual.getInfo()) {
-            // a função é chamada recursivamente para esquerda até encontrar o nó e então tratar os casos
-            noAtual.setEsquerda(remove(noAtual.getEsquerda(), info));
+        if (info < no.getInfo()) {
+            // a função é chamada recursivamente para esquerda até encontrar o nó e então
+            // tratar os casos
+            no.setEsquerda(remove(no.getEsquerda(), info));
         }
         // nó a ser removido está na subárvore à direita da raiz
-        else if (info > noAtual.getInfo()) {
-            // a função é chamada recursivamente para direita até encontrar o nó e então tratar os casos
-            noAtual.setDireita(remove(noAtual.getDireita(), info));
-        }
-        else {
+        else if (info > no.getInfo()) {
+            // a função é chamada recursivamente para direita até encontrar o nó e então
+            // tratar os casos
+            no.setDireita(remove(no.getDireita(), info));
+        } else {
             // Casos de Remoção:
 
-                // 1º Caso: Nó com nenhum filho
-            if (noAtual.getEsquerda() == null && noAtual.getDireita() == null) {
+            // 1º Caso: Nó com nenhum filho
+            if (no.getEsquerda() == null && no.getDireita() == null) {
                 return null;
             }
 
-                // 2º Caso: Nó somente com filho à esquerda
-            else if (noAtual.getDireita() == null) {
-                return noAtual.getEsquerda(); // Substituímos o nó pelo seu filho à esquerda
+            // 2º Caso: Nó somente com filho à esquerda
+            else if (no.getDireita() == null) {
+                return no.getEsquerda(); // Substituímos o nó pelo seu filho à esquerda
             }
 
-                // 3º Caso: Nó somente com filho à direita
-            else if (noAtual.getEsquerda() == null) {
-                return noAtual.getDireita(); // Substituímos o nó pelo seu filho à direita
+            // 3º Caso: Nó somente com filho à direita
+            else if (no.getEsquerda() == null) {
+                return no.getDireita(); // Substituímos o nó pelo seu filho à direita
             }
 
-                // 4º Caso: Nó com dois filhos
+            // 4º Caso: Nó com dois filhos
             else {
-                No sucessor = encontrarSucessor(noAtual.getDireita()); // o menor dentre os maiores
-                noAtual.setInfo(sucessor.getInfo());
+                No sucessor = encontrarSucessor(no.getDireita()); // o menor dentre os maiores
+                no.setInfo(sucessor.getInfo());
                 // remove o sucessor da posição original
-                noAtual.setDireita(remove(noAtual.getDireita(), sucessor.getInfo()));
+                no.setDireita(remove(no.getDireita(), sucessor.getInfo()));
             }
-        }    
+        }
 
         // atualizar a altura
-        atualizarAltura(noAtual);
+        atualizarAltura(no);
 
-        // balancear
-        return rebalancear(noAtual);
+        // balanceia a árvore a partir do nó crítico
+        return rebalancear(no);
     }
-
-
 
     // IMPRIME():
     public String preOrdem() {
-        return stringPreOrdem(this.noRaiz).trim();
+        StringBuilder sb = new StringBuilder();
+        stringPreOrdem(this.noRaiz, sb);
+        return sb.toString();
     }
 
-    private String stringPreOrdem(No no) {
-        // 
+    private static void stringPreOrdem(No no, StringBuilder sb) {
         if (no == null) {
-            return "";
+            return;
         }
-        return no.getInfo() + "("+ getBalanceamento(no) +") " + stringPreOrdem(no.getEsquerda()) + stringPreOrdem(no.getDireita());
+        sb.append(no.getInfo()).append("(").append(no.getBalanceamento()).append(") ");
+        stringPreOrdem(no.getEsquerda(), sb);
+        stringPreOrdem(no.getDireita(), sb);
     }
-
-
 
     // SUCESSOR:
     private No encontrarSucessor(No noRaiz) {
@@ -197,43 +202,38 @@ public class AVL {
         return noRaiz;
     }
 
-
-
     // ROTAÇÕES:
 
     private No rotacionarDireita(No noDesbalanceado) {
-        // Árvore desbalanceada à esquerda
-        No novaRaiz = noDesbalanceado.getEsquerda(); // a nova raiz da subárvore rotacionada será o filho a esquerda do nó desbalanceado
-        No subDireita = novaRaiz.getDireita();  // subàrvore a direita da nova raiz
+        No novaRaiz = noDesbalanceado.getEsquerda();
+        noDesbalanceado.setEsquerda(novaRaiz.getDireita());
 
-        // Executar rotação:
-        novaRaiz.setDireita(noDesbalanceado);   // nova raiz se torna a raiz da subárvore, e o no desbalanceado agora é o filho à direita
-        novaRaiz.setEsquerda(subDireita);   // a subàrvore à direita, agora é o filho à esquerda da nova raiz
 
-        // Atualizando as alturas:
+        novaRaiz.setDireita(noDesbalanceado);
+    
+
         atualizarAltura(noDesbalanceado);
         atualizarAltura(novaRaiz);
 
-        // retorna a nova "raiz"
-        return novaRaiz;    // a nova raiz da subárvore rotacionada
+        return novaRaiz;
     }
+    
 
     private No rotacionarEsquerda(No noDesbalanceado) {
-        // Árvore desbalanceada à direita
-        No novaRaiz = noDesbalanceado.getDireita(); // a nova raiz da subárvore rotacionada será o filho a esquerda do nó desbalanceado
-        No subDireita = novaRaiz.getEsquerda();  // subàrvore a direita da nova raiz
+        No novaRaiz = noDesbalanceado.getDireita();
+        noDesbalanceado.setDireita(novaRaiz.getEsquerda());
+    
 
-        // Executar rotação:
-        novaRaiz.setEsquerda(noDesbalanceado);   // nova raiz se torna a raiz da subárvore, e o no desbalanceado agora é o filho à direita
-        novaRaiz.setDireita(subDireita);   // a subàrvore à direita, agora é o filho à esquerda da nova raiz
 
-        // Atualizando as alturas:
+        novaRaiz.setEsquerda(noDesbalanceado);
+    
+
         atualizarAltura(noDesbalanceado);
         atualizarAltura(novaRaiz);
-
-        // retorna a nova "raiz"
-        return novaRaiz;    // a nova raiz da subárvore rotacionada
+    
+        return novaRaiz;
     }
+    
 
     // GETTERS AND SETTERS
     public No getNoRaiz() {

@@ -6,12 +6,14 @@ public class No {
     private No esquerda;
     private No direita;
     private int altura;
+    private int balanceamento;
     
     public No(int info) {
         this.info = info;
         this.esquerda = null;
         this.direita = null;
         this.altura = 1;
+        this.balanceamento = 0;
     }
 
     
@@ -48,4 +50,11 @@ public class No {
         this.altura = altura;
     }
 
+    public int getBalanceamento() {
+        return balanceamento;
+    }
+
+    public void setBalanceamento(int balanceamento) {
+        this.balanceamento = balanceamento;
+    }
 }
